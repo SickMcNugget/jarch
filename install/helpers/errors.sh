@@ -6,15 +6,24 @@ hjarch_show_cursor() {
 }
 
 # Display truncated log lines from the install log
-# hjarch_show_log_tail() {
-#     if [ -f "$JARCH_INSTALL_LOG_FILE" ]; then
-#         local log_lines=$(($TERM_HEIGHT - $LOGO_HEIGHT - 35))
-#         local max_line_width=$((LOGO_WIDTH - 4))
-# 
-#         tail -n $log_lines "$JARCH_INSTALL_LOG_FILE" | while IFS= read -r line; do
-#             if ((${#line} > max_line_width))
-# 
-# }
+hjarch_show_log_tail() {
+    if [ -f "$JARCH_INSTALL_LOG_FILE" ]; then
+        local log_lines=$(($TERM_HEIGHT - $LOGO_HEIGHT - 35))
+        local max_line_width=$((LOGO_WIDTH - 4))
+
+        tail -n $log_lines "$JARCH_INSTALL_LOG_FILE" | while IFS= read -r line; do
+            if ((${#line} > max_line_width)); then
+                local truncated_line="${line:0:$max_line_width}..."
+            else
+                local truncated_line="$line"
+            fi
+
+            gum style "$truncated_line"
+        done
+
+    echo
+    fi
+}
 
 hjarch_show_failed_script_or_command() {
     if [ -n "${CURRENT_SCRIPT:-}" ]; then
