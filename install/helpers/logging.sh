@@ -1,24 +1,31 @@
+#!/bin/bash
+# This file generally shouldn't be run directly, it is run by all.sh
+set -euo pipefail
+
 hjarch_start_log_output() {
-	local ANSI_SAVE_CURSOR="\033[s"
-	local ANSI_RESTORE_CURSOR="\033[u"
-	local ANSI_CLEAR_LINE="\033[2K"
-	local ANSI_HIDE_CURSOR="\033[?25l"
-	local ANSI_RESET="\033[0m"
-	local ANSI_GRAY="\033[90m"
+    local log_file="$1"
 
-	# Save cursor position and hide it
-	printf $ANSI_SAVE_CURSOR
-	printf $ANSI_HIDE_CURSOR
+    local ANSI_SAVE_CURSOR="\033[s"
+    local ANSI_RESTORE_CURSOR="\033[u"
+    local ANSI_CLEAR_LINE="\033[2K"
+    local ANSI_HIDE_CURSOR="\033[?25l"
+    local ANSI_RESET="\033[0m"
+    local ANSI_GRAY="\033[90m"
 
-	(
+    # Save cursor position and hide it
+    printf $ANSI_SAVE_CURSOR
+    printf $ANSI_HIDE_CURSOR
+
+    (
         local log_lines=20
         local max_line_width=$((LOGO_WIDTH - 4))
 
         while true; do
             # Read last N lines into an array
-            readarray -t current_lines < <(tail -n $log_lines "$JARCH_INSTALL_LOG_FILE" 2>/dev/null)
+            readarray -t current_lines < <(tail -n $log_lines "$log_file" 2>/dev/null)
 
             # Build output buffer with escape sequences
+            output=""
             for ((i = 0; i < log_lines; i++)); do
                 line="${current_lines[i]:-}"
 
@@ -30,7 +37,7 @@ hjarch_start_log_output() {
                 if [ -n "$line" ]; then
                     output+="${ANSI_CLEAR_LINE}${ANSI_GRAY}${PADDING_LEFT_SPACES} -> ${line}${ANSI_RESET}\n"
                 else
-                    output+="${ANSI_CLEAR_LINE}${PADDING_LEFT_SPACES}"
+                    output+="${ANSI_CLEAR_LINE}${PADDING_LEFT_SPACES}\n"
                 fi
             done
 
@@ -57,7 +64,15 @@ hjarch_start_install_log() {
     export JARCH_START_TIME=$(date '+%Y-%m-%d %H:%M:%S')
 
     echo "=== J-Arch Installation Started: $JARCH_START_TIME ===" >> "$JARCH_INSTALL_LOG_FILE"
-    hjarch_start_log_output
+    hjarch_start_log_output "$JARCH_INSTALL_LOG_FILE"
+}
+
+hjarch_start_configurator_log() {
+    sudo touch "$JARCH_CONFIGURATOR_LOG_FILE"
+    sudo chmod 666 "$JARCH_CONFIGURATOR_LOG_FILE"
+
+    echo "=== J-Arch Configurator Started ===" >> "$JARCH_CONFIGURATOR_LOG_FILE"
+    hjarch_start_log_output "$JARCH_CONFIGURATOR_LOG_FILE"
 }
 
 hjarch_stop_install_log() {

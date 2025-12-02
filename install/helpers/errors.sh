@@ -1,3 +1,7 @@
+#!/bin/bash
+# This file generally shouldn't be run directly, it is run by all.sh
+set -euo pipefail
+
 # Track if we're already handling an error to prevent double trapping
 ERROR_HANDLING=false
 

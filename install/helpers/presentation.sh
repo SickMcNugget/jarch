@@ -1,3 +1,7 @@
+#!/bin/bash
+# This file generally shouldn't be run directly, it is run by all.sh
+set -euo pipefail
+
 if ! command -v gum &>/dev/null; then
   sudo pacman -S --needed --noconfirm gum
 fi
